@@ -1,0 +1,3 @@
+---
+#Contiene las tareas comunes del Master y Worker
+- include_tasks: 01-masterworker.yaml

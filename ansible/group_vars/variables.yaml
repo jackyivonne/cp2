@@ -1,0 +1,31 @@
+---
+#Variables usadas en las invocaciones de las tareas
+#Servicios
+servicios_levantados: ['chronyd', 'firewalld']
+
+#Servicios firewall
+servicios_firewall: ['nfs', 'rpc-bind', 'mountd']
+
+#Host
+host_domain: ['10.0.1.10 kubemaster vmmaster.westeurope.cloudapp.azure.com', '10.0.1.11 kubenode1 vmworker.westeurope.cloudapp.azure.com', '10.0.1.13 nfs vmnfs.westeurope.cloudapp.azure.com']
+
+#Path de K8conf
+path_k8s_conf: '/etc/sysctl.d/k8s.conf'
+
+#Variables de CRIO
+crio_conf: ['overlay', 'br_netfilter']
+
+#Path de CRIO
+path_crio_conf: '/etc/modules-load.d/crio.conf'
+
+#Path de K8S Repo
+path_kubernetes_repo: '/etc/yum.repos.d/kubernetes.repo'
+
+#URLS K8S Repo
+kubernetes_repo: ['[kubernetes]', 'name=Kubernetes', 'baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64','enabled=1','gpgcheck=1','repo_gpgcheck=1','gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg','exclude=kubelet kubeadm kubectl']
+
+#Puertos firewall
+port_firewall: ['6443/tcp', '2379-2380/tcp','10250-10252/tcp', '10255/tcp']
+
+#Reglas de firewall
+rule_firewall: 'rule family=ipv4 source address=10.0.1.11/32 accept'

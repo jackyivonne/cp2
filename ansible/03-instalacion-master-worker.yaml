@@ -1,0 +1,9 @@
+# Contiene la instalacion comun del Master y Worker
+- name: Instalacion Master y Worker
+  hosts: 'master,workers'
+  vars_files:
+    - group_vars/variables.yaml
+  roles:
+    - masterworker
+    
+       

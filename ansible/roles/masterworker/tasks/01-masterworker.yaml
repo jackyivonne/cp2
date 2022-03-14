@@ -1,0 +1,127 @@
+---
+# El Yaml contiene las tareas para las configuraciones del Master y Worker
+    - name: Agregar lineas en archivo /etc/hosts
+      lineinfile:
+        path: /etc/hosts
+        line: '{{item}}'
+      become: true
+      with_items: '{{host_domain}}'
+    - name: Status firewalld
+      shell: |
+        systemctl status firewalld  > /tmp/fileConsultaFirewalld.txt
+      become: true
+    - name: Restard firewall
+      systemd:
+        name: firewalld
+        state: restarted
+      become: true
+    - name: Status firewalld
+      shell: |
+        systemctl status firewalld  > /tmp/fileStatusFirewalld.txt
+      become: true
+    - name: Comando Modprobe
+      modprobe:
+        name: br_netfilter
+      become: true
+    - name: Masquerade firewalld
+      ansible.posix.firewalld:
+        masquerade: yes
+        state: enabled
+        permanent: yes
+      become: true
+    - name: Reload firewall
+      systemd:
+        name: firewalld
+        state: reloaded
+      become: true
+    - name: Se crea la clave net.bridge.bridge-nf-call-ip6tables
+      sysctl:
+        name: net.bridge.bridge-nf-call-ip6tables
+        sysctl_file: '{{path_k8s_conf}}'
+        value: 1
+        sysctl_set: 'yes'
+        state: present
+        reload: 'yes'
+      become: true
+    - name: Se cre la clave net.bridge.bridge-nf-call-iptables
+      sysctl:
+        name: net.bridge.bridge-nf-call-iptables
+        sysctl_file: '{{path_k8s_conf}}'
+        value: 1
+        sysctl_set: 'yes'
+        state: present
+        reload: 'yes'
+      become: true
+    - name: Se crea la clave net.ipv4.ip_forward
+      sysctl:
+        name: net.ipv4.ip_forward
+        sysctl_file: '{{path_k8s_conf}}'
+        value: 1
+        sysctl_set: 'yes'
+        state: present
+        reload: 'yes'
+      become: true
+    - name: Desabilitar SWAP
+      shell: |
+        swapoff -a
+      become: true
+    - name: Eliminar del archivo fstab
+      lineinfile:
+        path: /etc/fstab
+        regexp: '^$cs-swap'
+        state: absent
+        backup: no
+      become: true
+    - name: Configuracion Crio Engine Repositorio 1
+      command: wget -O /etc/yum.repos.d/devel:kubic:libcontainers:stable.repo https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/CentOS_8_Stream/devel:kubic:libcontainers:stable.repo        
+      become: true
+    - name: Configuracion Crio Engine Repositorio 2
+      command: wget -O /etc/yum.repos.d/devel:kubic:libcontainers:stable:cri-o:1.23:1.23.1.repo https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable:cri-o:1.23:1.23.1/CentOS_8_Stream/devel:kubic:libcontainers:stable:cri-o:1.23:1.23.1.repo        
+      become: true
+    - name: Touch a file crio.conf
+      file:
+        path: '{{path_crio_conf}}'
+        state: touch
+        mode: u=rw,g=rw,o=rw
+      become: true
+    - name: Agregar lineas en archivo /etc/modules-load.d/crio.conf
+      lineinfile:
+        path: '{{path_crio_conf}}'
+        line: '{{item}}'
+        insertafter: EOF
+      become: true
+      with_items: '{{crio_conf}}'
+    - name: Instalacion CRIO
+      command: dnf install cri-o -y
+      become: true
+    - name: Start de CRIO
+      systemd:
+        name: crio    
+        state: started
+        enabled: yes
+        masked: no
+      become: true
+    - name: Touch a file kubernetes.repo
+      file:
+        path: '{{path_kubernetes_repo}}'
+        state: touch
+        mode: u=rw,g=rw,o=rw
+      become: true
+    - name: Agregar lineas en archivo kubernetes.repo
+      lineinfile:
+        path: '{{path_kubernetes_repo}}'
+        line: '{{item}}'
+        insertafter: EOF
+      become: true
+      with_items: '{{kubernetes_repo}}'
+    - name: Instalacion Kubernetes
+      shell: |
+        dnf install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+      become: true
+    - name: Start de kubelet
+      systemd:
+        name: kubelet    
+        state: started
+        enabled: yes
+        masked: no
+      become: true

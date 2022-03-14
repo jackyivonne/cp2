@@ -1,0 +1,9 @@
+# Contiene la instalacion del Master
+- name: Instalacion Master
+  hosts: 'master'
+  vars_files:
+    - group_vars/variables.yaml
+  roles:
+    - master
+     
+              

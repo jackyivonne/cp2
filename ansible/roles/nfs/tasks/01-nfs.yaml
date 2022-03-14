@@ -1,0 +1,57 @@
+---
+# El Yaml contiene las tareas para las configuraciones del NFS
+    - name: Install paquetes NFS nfs-utils
+      yum: 
+        name: nfs-utils 
+        state: latest          
+      become: true
+    - name: Install paquetes NFS net-tools
+      yum: 
+        name: net-tools 
+        state: latest          
+      become: true
+    - name: Enable nfs-server
+      shell: |
+        systemctl  enable nfs-server  
+      become: true
+    - name: Start nfs-server
+      shell: |
+        systemctl start nfs-server  
+      become: true
+    - name: Creacion directorio
+      file:
+        path: /srv/nfs
+        state: directory
+        mode: "0755"
+        recurse: yes
+      become: true
+    - name: Copiar exports file
+      template:
+        src: exports
+        dest: /etc/exports
+        owner: root
+        group: root
+        mode: 0644
+      become: true
+    - name: NFS sistema ficheros
+      shell: df -hP > /tmp/fileConsulta.txt
+      become: true
+    - name: NFS exports r
+      shell: exportfs -r
+      become: true
+    - name: NFS exports s
+      shell: exportfs -s
+      become: true
+    - name: Firewall enabled
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        state: enabled
+        permanent: true                
+      with_items:
+        "{{servicios_firewall}}"
+      become: true
+    - name: Reload firewall
+      systemd: 
+        name: firewalld
+        state: reloaded
+      become: true

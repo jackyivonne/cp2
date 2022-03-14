@@ -1,0 +1,4 @@
+---
+#Contiene las tareas del Master
+
+- include_tasks: 01-master.yaml

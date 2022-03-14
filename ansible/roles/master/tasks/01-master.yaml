@@ -1,0 +1,55 @@
+---
+# El Yaml contiene las tareas para la configuraciones del Master
+    - name: Firewall puertos enabled
+      ansible.posix.firewalld:
+        port: "{{item}}"
+        state: enabled
+        permanent: true                
+      with_items:
+        "{{port_firewall}}"
+      become: true
+    - name: Reload firewall por puertos
+      systemd: 
+        name: firewalld
+        state: reloaded
+      become: true
+    - name: Imagenes pull
+      shell: kubeadm config images pull
+      become: true
+    - name: Firewall rules enabled
+      ansible.posix.firewalld:
+        rich_rule: "{{rule_firewall}}"
+        state: enabled
+        permanent: true
+      become: true
+    - name: Reload firewall por rule
+      systemd: 
+        name: firewalld
+        state: reloaded
+      become: true
+    - name: kubeadm bajar
+      shell: kubeadm reset -f
+      become: true
+    - name: CNI Container Network Interface de kubernetes
+      shell: kubeadm init --pod-network-cidr 10.1.0.0/16 > /tmp/salidaKubeAdmin.txt      
+      become: true
+    - name: crear .kube directorio
+      become: true
+      become_user: root
+      file:
+        path: /root/.kube
+        state: directory
+        mode: 0777
+    - name: copiar admin.conf a  kube config
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /root/.kube/config
+        remote_src: yes
+        owner: root
+      become: true
+    - name: Permisos
+      shell: chown $(id -u):$(id -g) /root/.kube/config     
+      become: true
+    - name: Get nodes
+      command: kubectl get nodes
+      become: true

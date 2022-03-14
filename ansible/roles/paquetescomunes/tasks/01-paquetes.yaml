@@ -1,0 +1,50 @@
+---
+# El Yaml contiene las tareas para las configuraciones del Master,NFS y Worker
+    - name: Update paquetes
+      dnf:
+        name: "*" 
+        state: latest          
+      become: true 
+    - name: Zona horaria Europe/Madrid
+      timezone:
+       name: Europe/Madrid
+      become: true
+    - name: Install chrony
+      yum: 
+        name: chrony 
+        state: latest          
+      become: true   
+    - name: Enabled Servicios comunes Chrony 
+      systemd:
+        name: "{{item}}"
+        state: started
+        enabled: yes
+        masked: no
+      become: yes
+      with_items:
+        "{{servicios_levantados}}"  
+      become: true
+    - name: Timedatectl
+      command: timedatectl set-ntp true 
+      become: true    
+    - name: Desactivacion SELinux
+      replace:
+        path: /etc/selinux/config
+        regexp: 'SELINUX=enforcing'
+        replace: 'SELINUX=disabled'
+      become: true
+    - name: Install paquetes nfs utils
+      yum: 
+        name: nfs-utils 
+        state: latest          
+      become: true
+    - name: Install paquetes nfs tools
+      yum: 
+        name: nfs4-acl-tools 
+        state: latest          
+      become: true 
+    - name: Install paquetes wget
+      yum: 
+        name: wget 
+        state: latest          
+      become: true

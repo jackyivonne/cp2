@@ -1,0 +1,3 @@
+---
+#Contiene las tareas comunes del Master,NFS y Worker
+- include_tasks: 01-paquetes.yaml

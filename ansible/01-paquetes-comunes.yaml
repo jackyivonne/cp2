@@ -1,0 +1,8 @@
+# Contiene la instalacion de los Paquetes comunes a las maquinas
+- name: Configuraciones generales
+  hosts: "*"
+  vars_files:
+    - "group_vars/variables.yaml"
+  roles:
+    - paquetescomunes
+            

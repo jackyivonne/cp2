@@ -1,0 +1,8 @@
+# Contiene la instalacion del NFS
+- name: Instalacion NFS
+  hosts: nfs
+  vars_files:
+    - "group_vars/variables.yaml"
+  roles:
+    - nfs 
+         
